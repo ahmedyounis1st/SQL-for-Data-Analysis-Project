@@ -1,0 +1,56 @@
+/* Query 1 */
+SELECT i.CustomerId, c.FirstName, c.LastName, 
+sum(i.total) as total_customer_purchases 
+from Invoice i 
+JOIN Customer c
+ON i.CustomerId = c.CustomerId
+GROUP BY i.CustomerId
+ORDER BY total_customer_purchases DESC
+LIMIT 10;
+
+/* Query 2 */ 
+SELECT a.ArtistId, a.Name, count(a.ArtistId) as Songs
+FROM Artist a
+JOIN Album m
+ON a.ArtistId = m.ArtistId
+JOIN Track t
+ON t.AlbumId = m.AlbumId And t.GenreId = 1
+GROUP BY a.ArtistId
+ORDER BY Songs DESC
+LIMIT 10;
+
+/* Query 3 */ 
+SELECT a.Name, sum(l.UnitPrice * l.total_Quantity) as AmountSpent
+FROM Artist a
+JOIN Album m
+ON a.ArtistId = m.ArtistId
+JOIN Track t
+ON t.AlbumId = m.AlbumId 
+JOIN (SELECT TrackId, UnitPrice, count(Quantity) as total_Quantity 
+FROM InvoiceLine 
+GROUP BY TrackId) l 
+ON t.TrackId = l.TrackId
+GROUP BY a.Name
+ORDER BY AmountSpent DESC
+LIMIT 10;
+
+/* Query 4 */ 
+SELECT a.Name, sum(l.UnitPrice * l.total_Quantity) as AmountSpent,
+c.CustomerId, c.FirstName, c.LastName
+FROM Artist a
+JOIN Album m
+ON a.ArtistId = m.ArtistId
+JOIN Track t
+ON t.AlbumId = m.AlbumId 
+JOIN (SELECT TrackId, InvoiceId, UnitPrice, count(Quantity) as total_Quantity 
+FROM InvoiceLine 
+GROUP BY TrackId, InvoiceId) l 
+ON t.TrackId = l.TrackId
+JOIN Invoice i
+ON l.InvoiceId = i.InvoiceId
+JOIN Customer c
+ON i.CustomerId = c.CustomerId
+GROUP BY a.Name, c.CustomerId
+HAVING a.Name = "Iron Maiden"
+ORDER BY AmountSpent DESC
+LIMIT 10;
